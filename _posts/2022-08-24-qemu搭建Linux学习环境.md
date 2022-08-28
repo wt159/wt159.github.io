@@ -124,11 +124,55 @@ make CROSS_COMPILE=arm-linux-gnueabi- ARCH=arm install
 ```
 
 5. 制作根文件系统
-
+新建脚本 `vi create_ext4_rootfs.sh`
 ```shell
+#!/bin/sh
+busybox_folder="./busybox-1.30.1"
+rootfs="rootfs"
+img_name="disk.img"
+echo $base_path
+if [ ! -d $rootfs ]; then #判断文件是否存在
+        mkdir $rootfs
+fi
+cp $busybox_folder/_install/*  $rootfs/ -rf
+cd $rootfs
+if [ ! -d proc ] && [ ! -d sys ] && [ ! -d dev ] && [ ! -d etc/init.d ]; then
+        mkdir proc sys dev etc etc/init.d
+fi
+ 
+if [ -f etc/init.d/rcS ]; then
+        rm etc/init.d/rcS
+fi
+echo "#!/bin/sh" > etc/init.d/rcS
+echo "mount -t proc none /proc" >> etc/init.d/rcS
+echo "mount -t sysfs none /sys" >> etc/init.d/rcS
+echo "/sbin/mdev -s" >> etc/init.d/rcS
+chmod +x etc/init.d/rcS
 
 
+cd ../
+#生成一个512M的镜像
+if [ -f ./$img_name ]; then
+        rm ./$img_name
+fi
+qemu-img create -f raw $img_name 512M
+
+#把镜像格式化成ext4文件系统
+mkfs -t ext4 ./$img_name
+
+#将rootfs根目录中的所有文件复制到磁盘镜像中 操作步骤是：创建挂载点-挂载-复制文件-卸载。
+if [ -f ./tmpfs ]; then
+        rm ./tmpfs
+fi
+mkdir tmpfs
+sudo mount -o loop ./$img_name tmpfs/
+sudo cp -r $rootfs/* tmpfs/
+sudo umount tmpfs
+
+#使用file指令查看镜像
+file $img_name
 ```
+执行此脚本后，会在当前目录生成一个disk.img的文件系统镜像。
 
 7. `Q&A`
 * Q:stime error
@@ -156,8 +200,11 @@ make: *** [Makefile:718：busybox_unstripped] 错误 1
 ```
 * A: 1.30.1有个bug，合入一个patch就可以了.
 [patch地址](https://git.busybox.net/busybox/commit/?id=d3539be8f27b8cbfdfee460fe08299158f08bcd9)
+
+# qemu运行Linux内核
 ```shell
-Stime()在glibc 2.31中已弃用，并被替换为
-clock_settime()。让我们将stime()函数调用替换为
-clock_settime()。
+cp disk.img ./linux-5.10.99/extra/
+cd ./linux-5.10.99/extra/
+qemu-system-arm -M vexpress-a9 -m 512M -kernel zImage -dtb vexpress-v2p-ca9.dtb -nographic -append "root=/dev/mmcblk0 rw console=ttyAMA0" -sd disk.img
 ```
+上面三步执行完之后，就会在当前终端使用qemu运行Linux。
