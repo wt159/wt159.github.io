@@ -124,7 +124,8 @@ make CROSS_COMPILE=arm-linux-gnueabi- ARCH=arm install
 ```
 
 5. 制作根文件系统
-新建脚本 `vi create_ext4_rootfs.sh`
+新建脚本 `vi create_ext4_rootfs.sh` 
+
 ```shell
 #!/bin/sh
 busybox_folder="./busybox-1.30.1"
