@@ -32,14 +32,14 @@ sudo apt-get install gcc-arm-linux-gnueabi -y
 ### 方法二(自己选择版本)
 1. 下载编译链，执行命令
 ```shell
-wget https://releases.linaro.org/components/toolchain/binaries/latest-7/arm-linux-gnueabi/gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabi.tar.xz
+wget https://releases.linaro.org/components/toolchain/binaries/latest-7/arm-linux-gnueabi/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabi.tar.xz
 ```
 关于编译链的资料参考：
 [arm交叉编译器gnueabi、none-eabi、arm-eabi、gnueabihf的区别](https://www.cnblogs.com/linuxbo/p/4297680.html)
 
 2. 解压源码
 ```shell
-tar -xjf gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabi.tar.xz
+tar -xjf gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabi.tar.xz
 ```
 3. 添加环境变量，使你的编译链全局可用
 ```shell
@@ -47,7 +47,7 @@ gedit /etc/profile
 ```
 在最后一行加入：
 ```shell
-export PATH=$PATH:/qemu-lab/gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabi/bin
+export PATH=$PATH:/qemu-lab/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabi/bin
 ```
 该路径是你编译链加压后的编译工具所在的路径
 
