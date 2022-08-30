@@ -30,7 +30,7 @@ libgl1-mesa-dev libxml2-utils xsltproc unzip u-boot-tools qemu
 sudo apt-get install gcc-arm-linux-gnueabi -y
 ```
 ### 方法二(自己选择版本)
-1. 下载编译链，执行命令
+1. 下载编译链，执行命令 [arm交叉编译器下载地址](https://releases.linaro.org/components/toolchain/binaries/)
 ```shell
 wget https://releases.linaro.org/components/toolchain/binaries/latest-7/arm-linux-gnueabi/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabi.tar.xz
 ```
