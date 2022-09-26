@@ -17,6 +17,8 @@ tags: tools linux Linux内核 qemu
 ## vm虚拟机和Ubuntu安装
 [参考链接](https://zhuanlan.zhihu.com/p/141033713)
 
+## vbox虚拟机和ubuntu安装
+[参考链接](https://zhuanlan.zhihu.com/p/317188273)
 ## 相关工具链
 命令行终端下输入：
 ```shell
