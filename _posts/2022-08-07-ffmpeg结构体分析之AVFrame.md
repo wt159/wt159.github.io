@@ -14,7 +14,7 @@ AVFrame结构体一般用于存储原始数据（即非压缩数据，例如对�
 
 # 定义
 
-```C
+```c
 typedef struct AVFrame {
 #define AV_NUM_DATA_POINTERS 8
     /**
@@ -408,19 +408,19 @@ typedef struct AVFrame {
 
 对于planar格式的数据（例如YUV420P），则会分开成data[0]，data[1]，data[2]...（YUV420P中data[0]存Y，data[1]存U，data[2]存V）
 
-```C
+```c
 uint8_t *data[AV_NUM_DATA_POINTERS];
 ```
 
 ### 数据缓冲区大小
 
-```C
+```c
 int linesize[AV_NUM_DATA_POINTERS];
 ```
 
 ### 编码后的数据包大小
 
-```C
+```c
 /**
      * 含有压缩后的数据包的相应大小。
      * 帧。
@@ -433,7 +433,7 @@ int linesize[AV_NUM_DATA_POINTERS];
 
 ### 格式
 
-```C
+```c
 /**
      * 帧的格式，如果未知或未设置则为-1
      *值对应于视频帧的enum AVPixelFormat。
@@ -446,7 +446,7 @@ int linesize[AV_NUM_DATA_POINTERS];
 
 ### 样本数
 
-```C
+```c
     /**
      * 该帧所描述的音频样本数（每通道）。
      */
@@ -455,7 +455,7 @@ int linesize[AV_NUM_DATA_POINTERS];
 
 ### 采样率
 
-```C
+```c
     /**
      * Sample rate of the audio data. 音频数据采样率
      */
@@ -464,7 +464,7 @@ int linesize[AV_NUM_DATA_POINTERS];
 
 ### 声道数
 
-```C
+```c
     /**
      * number of audio channels, only used for audio.音频数据通道
      * - encoding: unused
@@ -475,7 +475,7 @@ int linesize[AV_NUM_DATA_POINTERS];
 
 ### 声道布局
 
-```C
+```c
     /**
      * Channel layout of the audio data.音频数据的声道布局
      */
@@ -486,13 +486,13 @@ int linesize[AV_NUM_DATA_POINTERS];
 
 ### 视频帧宽和高（1920x1080,1280x720...）
 
-```C
+```c
 int width, height;
 ```
 
 ### 关键帧
 
-```C
+```c
 /**
  * 1 -> 关键帧, 0-> not
  */
@@ -501,7 +501,7 @@ int key_frame;
 
 ### 帧类型
 
-```C
+```c
 /**
  * 帧的图片类型。
  */
@@ -525,7 +525,7 @@ enum AVPictureType {
 
 ### 宽高比
 
-```C
+```c
 /**
  * 视频帧的采样宽高比, 0/1 if unknown/unspecified.
  */
@@ -546,7 +546,7 @@ typedef struct AVRational{
 
 ### 显示时间戳
 
-```C
+```c
 /**
  * 以Time_base为单位的展示时间戳（框架应该显示给用户的时间）。
  */
@@ -555,7 +555,7 @@ int64_t pts;
 
 ### 编码帧序号
 
-```C
+```c
 /**
  * 按比特流顺序显示的图像编号
  */
@@ -566,7 +566,7 @@ int display_picture_number：
 
 ### 显示帧序号
 
-```C
+```c
 /**
  * 按显示顺序显示的图片编号
  */
@@ -575,12 +575,12 @@ int display_picture_number;
 
 ### QP表
 
-```C
+```c
 int8_t *qscale_table;
 ```
 
 ### 是否是隔行扫描
 
-```C
+```c
 int interlaced_frame;
 ```

@@ -6,7 +6,7 @@ mermaid: true
 
 # 概述
 
-```C++
+```c++
 #include <condition_variable>
 class std::condition_variable;
 ```
@@ -20,7 +20,7 @@ class std::condition_variable;
 
 ## 构造函数
 
-```C++
+```c++
 condition_variable(); //构造 std::condition_variable 类型对象。
 condition_variable(const condition_variable&) = delete; //被删除
 ```
@@ -32,7 +32,7 @@ condition_variable(const condition_variable&) = delete; //被删除
 
 ## 析构函数
 
-```C++
+```c++
 ~condition_variable(); //销毁 std::condition_variable 类型对象。
 ```
 
@@ -42,7 +42,7 @@ condition_variable(const condition_variable&) = delete; //被删除
 
 ## 通知函数
 
-```C++
+```c++
 void notify_one() noexcept;
 // 若任何线程在 *this 上等待，则调用 notify_one 会解阻塞等待线程之一。
 void notify_all() noexcept;
@@ -63,7 +63,7 @@ void notify_all() noexcept;
 
 ### `wait()函数`
 
-```C++
+```c++
 void wait( std::unique_lock<std::mutex>& lock );
 
 template< class Predicate >
@@ -75,7 +75,7 @@ void wait( std::unique_lock<std::mutex>& lock, Predicate pred );
 
 ### `wait_for()函数`
 
-```C++
+```c++
 template< class Rep, class Period >
 std::cv_status wait_for( std::unique_lock<std::mutex>& lock,
         const std::chrono::duration<Rep, Period>& rel_time);
@@ -90,7 +90,7 @@ bool wait_for( std::unique_lock<std::mutex>& lock,
 
 ### `wait_until()函数`
 
-```C++
+```c++
 template< class Clock, class Duration >
 std::cv_status
     wait_until( std::unique_lock<std::mutex>& lock,
@@ -124,7 +124,7 @@ native_handle_type 条件变量的类型
 
 ## 原生句柄函数
 
-```C++
+```c++
 native_handle_type native_handle();
 ```
 

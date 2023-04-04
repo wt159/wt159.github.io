@@ -6,7 +6,7 @@ mermaid: true
 
 # 概述
 
-```C++
+```c++
 #include <mutex>
 class std::recursive_mutex;
 ```
@@ -29,7 +29,7 @@ class std::recursive_mutex;
 
 构造新的 recursive_mutex 对象。
 
-```C++
+```c++
 recursive_mutex();
 
 recursive_mutex( const recursive_mutex& ) = delete;
@@ -42,7 +42,7 @@ recursive_mutex( const recursive_mutex& ) = delete;
 
 销毁 recursive_mutex 对象。
 
-```C++
+```c++
 ~recursive_mutex();
 ```
 
@@ -50,7 +50,7 @@ recursive_mutex( const recursive_mutex& ) = delete;
 
 ### 复制函数
 
-```C++
+```c++
 recursive_mutex& operator=( recursive_mutex&& other ) = delete;
 ```
 
@@ -58,7 +58,7 @@ recursive_mutex& operator=( recursive_mutex&& other ) = delete;
 
 * `lock`函数
 
-    ```C++
+    ```c++
     void lock();
     ```
 
@@ -72,7 +72,7 @@ recursive_mutex& operator=( recursive_mutex&& other ) = delete;
 
 * `try_lock`函数
 
-    ```C++
+    ```c++
     bool try_lock();
     ```
 
@@ -88,7 +88,7 @@ recursive_mutex& operator=( recursive_mutex&& other ) = delete;
 
 * `unlock`函数
 
-    ```C++
+    ```c++
     bool unlock();
     ```
 
@@ -100,7 +100,7 @@ recursive_mutex& operator=( recursive_mutex&& other ) = delete;
 
 * `native_handle`函数
 
-    ```C++
+    ```c++
     native_handle_type native_handle();
     ```
 
