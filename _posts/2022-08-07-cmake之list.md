@@ -30,7 +30,7 @@ list(REVERSE <list>)
 list(SORT <list>)
 ```
 
-### list变量定义：
+### list变量定义
 
 ```
 set(my_list_var aaa bbb ccc ddd)
@@ -149,7 +149,6 @@ message("list REMOVE_DUPLICATES out: ${my_list_var}")
 [cmake] list REMOVE_DUPLICATES out: aaa;ddd;eee;fff
 ```
 
-
 ### REVERSE(反转element顺序)
 
 ```
@@ -162,7 +161,6 @@ message("list reverse out: ${my_list_var}")
 ```
 [cmake] list reverse out: fff;eee;ddd;aaa
 ```
-
 
 ### SORT(对element排序)
 
@@ -178,6 +176,7 @@ message("list sort out: ${my_list_var}")
 ```
 
 ### 应用案例1
+
 ```
 # 从源文件删除某个文件(名称带有`a`)
 foreach (TMP_SRC_FILE ${my_list_var})
@@ -187,7 +186,9 @@ foreach (TMP_SRC_FILE ${my_list_var})
 endforeach()
 message("list  out: ${my_list_var}")
 ```
+
 输出为：
+
 ```
 [cmake] list  out: ddd;eee;fff
 ```

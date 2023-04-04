@@ -7,22 +7,27 @@ mermaid: true
 [blog](https://blog.csdn.net/hp_cpp/article/details/110373926)
 
 # cmake之message函数
+
 message :为用户显示一条消息
 > message( [STATUS|WARNING|AUTHOR_WARNING|FATAL_ERROR|SEND_ERROR]
   "message to display" ...)
+
 ```makefile
 message( [STATUS|WARNING|AUTHOR_WARNING|FATAL_ERROR|SEND_ERROR]
   "message to display" ...)
 ```
 
-## 消息类型：
+## 消息类型
+
 * (无) = 重要消息
 * `STATUS` = 非重要消息
 * `WARNING` = CMake 警告, 会继续执行
 * `AUTHOR_WARNING` = CMake 警告 (dev), 会继续执行
 * `SEND_ERROR` = CMake 错误, 继续执行，但是会跳过生成的步骤
 * `FATAL_ERROR` = CMake 错误, 终止所有处理过程
+
 ## 消息输出
+
 1. `CMake` 的命令行工具会在 `stdout` 上显示 `STATUS` 消息，在 `stderr` 上显示其他所有消息。
 
 2. `CMake` 的 `GUI` 会在它的 `log` 区域显示所有消息。
@@ -32,13 +37,16 @@ message( [STATUS|WARNING|AUTHOR_WARNING|FATAL_ERROR|SEND_ERROR]
 度的行会回卷，段落之间以新行做为分隔符。
 
 ## 输出错误 `FATAL_ERROR`
+
 ```makefile
 message(
     FATAL_ERROR 
     " FATAL: In-source builds are not allowed.You should create a separate directory for build files." 
     )
 ```
+
 ## 输出警告 `WARNING`
+
 ```makefile
 message(
     WARNING 
@@ -47,6 +55,7 @@ message(
 ```
 
 ## 输出错误 `STATUS`
+
 ```makefile
 message(
     STATUS 
@@ -55,7 +64,9 @@ message(
 ```
 
 ## 输出变量的值
+
 message函数可以输出变量的值，和变量的用法一致。
+
 ```makefile
 set(MY_KEY "this is my key")
 message(STATUS "this var key = ${MY_KEY}")

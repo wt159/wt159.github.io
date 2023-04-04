@@ -118,7 +118,6 @@ bool wait_until( std::unique_lock<std::mutex>& lock,
 3. `wait_until(lock, timeout_time)` 若经过 `timeout_time` 所指定的关联时限则为 `std::cv_status::timeout` ，否则为 `std::cv_status::no_timeout` 。
 4. `wait_until(lock, timeout_time, pred)` 若度过 `timeout_time` 时限后 `pred` 仍求值为 `false` 则为 `false` ，否则为 `true` 。若已度过时限，则求值并返回 `pred` 的结果。
 
-
 # 成员类型
 
 native_handle_type 条件变量的类型
