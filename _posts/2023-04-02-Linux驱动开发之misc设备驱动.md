@@ -72,7 +72,7 @@ struct xxx_dev_t {
 };
 static struct xxx_dev_t xxx_dev;
 
-static int xxx_open(struct inode* indoe, struct file* filp)
+static int xxx_open(struct inode* inode, struct file* filp)
 {
     filp->private_data = &xxx_dev;
     return 0;
