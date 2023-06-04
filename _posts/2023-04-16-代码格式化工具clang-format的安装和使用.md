@@ -74,6 +74,17 @@ find . -iname "*.cpp" -o -iname "*.h" | xargs clang-format -style=Google -i
 
 这里使用的是Google风格，`-i`选项表示直接修改文件，不生成新的文件。
 
+## 常用风格
+
+```bash
+clang-format --help
+```
+
+```bash
+--style=\<string\>               - Coding style, currently supports:
+                                     LLVM, GNU, Google, Chromium, Microsoft, Mozilla, WebKit.
+```
+
 ## 自定义风格
 
 如果需要自定义代码格式化风格，可以使用clang-format提供的配置文件。配置文件可以指定各种格式化选项，如缩进、换行、空格等。
@@ -89,6 +100,12 @@ find . -iname "*.cpp" -o -iname "*.h" | xargs clang-format -style=Google -i
 ```
 
 配置文件的名称为`.clang-format`，可以放置在代码仓库的根目录或者子目录中。当运行clang-format时，它会在当前目录和父目录中查找配置文件，如果找到则使用该文件中的配置项。
+
+### 生成Webkit风格的.clang-format文件
+
+```bash
+clang-format -style=Webkit -dump-config > .clang-format
+```
 
 ## 结论
 
