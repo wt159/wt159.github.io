@@ -89,9 +89,9 @@ install(
     EXPORT ${LIB_NAME}-targets
     # 头文件
     PUBLIC_HEADER DESTINATION include
-    # 动态库
-    ARCHIVE DESTINATION lib
     # 静态库
+    ARCHIVE DESTINATION lib
+    # 动态库
     LIBRARY DESTINATION lib
     # 可执行程序
     RUNTIME DESTINATION bin)
@@ -113,7 +113,7 @@ install(
 
 CMakeLists.txt内容如下:
 
-```
+```cmake
 cmake_minimum_required(VERSION 3.0.0)
 project(Demo11 VERSION 0.1.0)
 
