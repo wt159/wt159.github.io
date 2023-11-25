@@ -107,6 +107,14 @@ clang-format --help
 clang-format -style=Webkit -dump-config > .clang-format
 ```
 
+### 递归格式化
+
+```shell
+find . -regex '.*\.\(c\|h\|cpp\|hpp\|cc\|cxx\)' -exec ~/.vscode-server/extensions/ms-vscode.cpptools-1.18.4/LLVM/bin/clang-format -i -style=file {} \;
+
+find . -regex '.*\.\(c\|h\|cpp\|hpp\|cc\|cxx\)' -exec ~/.vscode-server/extensions/ms-vscode.cpptools-1.18.4/LLVM/bin/clang-format -i -style=WebKit {} \;
+```
+
 ## 结论
 
 使用clang-format可以大大提高代码的可读性和可维护性，同时也可以减少代码审查的时间和工作量。在实际开发中，建议使用clang-format来规范代码格式。
