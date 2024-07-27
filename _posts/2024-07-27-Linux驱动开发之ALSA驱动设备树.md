@@ -146,7 +146,7 @@ sdma: sdma@020ec000 {
 
 ## 源文件
 
-```C
+```c
 //sound/soc/fsl/imx-wm8960.c
 static const struct of_device_id imx_wm8960_dt_ids[] = {
     { .compatible = "fsl,imx-audio-wm8960", },
@@ -164,7 +164,7 @@ static struct platform_driver imx_wm8960_driver = {
 module_platform_driver(imx_wm8960_driver);
 ```
 
-```C
+```c
 //sound/soc/fsl/fsl_sai.c
 static const struct of_device_id fsl_sai_ids[] = {
     { .compatible = "fsl,vf610-sai", },
@@ -182,7 +182,7 @@ static struct platform_driver fsl_sai_driver = {
 module_platform_driver(fsl_sai_driver);
 ```
 
-```C
+```c
 //sound/soc/fsl/fsl_asrc.c
 static const struct of_device_id fsl_asrc_ids[] = {
     { .compatible = "fsl,imx35-asrc", },
@@ -201,7 +201,7 @@ static struct platform_driver fsl_asrc_driver = {
 module_platform_driver(fsl_asrc_driver);
 ```
 
-```C
+```c
 //sound/soc/codecs/wm8960.c
 static const struct of_device_id wm8960_of_match[] = {
        { .compatible = "wlf,wm8960", },
