@@ -20,7 +20,7 @@ asla驱动代码结构[https://kernel.org/doc/html/latest/sound/kernel-api/writi
 
 ## 设备树 `imx6ull-alientek-emmc.dts`
 
-```dts
+```shell
 sound {
     compatible = "fsl,imx6ul-evk-wm8960",
             "fsl,imx-audio-wm8960";
@@ -90,7 +90,7 @@ sound {
 
 ## 次级设备树 `imx6ull.dtsi`
 
-```dts
+```shell
 sai2: sai@0202c000 {
     compatible = "fsl,imx6ul-sai",
                 "fsl,imx6sx-sai";
