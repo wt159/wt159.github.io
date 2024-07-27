@@ -16,7 +16,7 @@ mermaid: true
 
 > sound/soc/codecs/wm8960.c
 
-```C
+```c
 static struct snd_soc_dai_driver wm8960_dai = {
     .name = "wm8960-hifi",
     .playback = {
@@ -110,7 +110,7 @@ static int wm8960_i2c_probe(struct i2c_client *i2c,
 }
 ```
 
-```C
+```c
 snd_soc_register_codec(&i2c->dev, &soc_codec_dev_wm8960, &wm8960_dai, 1);
 --> kzalloc(sizeof(struct snd_soc_codec), GFP_KERNEL);
 --> snd_soc_component_initialize(&codec->component, &codec_drv->component_driver, dev);

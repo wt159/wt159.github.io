@@ -16,7 +16,7 @@ mermaid: true
 
 > sound/soc/fsl/imx-wm8960.c
 
-```C
+```c
 static struct snd_soc_dai_link imx_wm8960_dai[] = {
     {
         .name = "HiFi",
@@ -255,7 +255,7 @@ fail:
 }
 ```
 
-```C
+```c
 devm_snd_soc_register_card(&pdev->dev, &data->card);
 --> devres_alloc(devm_card_release, sizeof(*ptr), GFP_KERNEL);
 --> snd_soc_register_card(card);

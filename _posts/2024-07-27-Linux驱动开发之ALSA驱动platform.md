@@ -16,7 +16,7 @@ mermaid: true
 
 > sound/soc/fsl/fsl_sai.c
 
-```C
+```c
 static struct snd_soc_dai_driver fsl_sai_dai = {
     .probe = fsl_sai_dai_probe,
     .playback = {
@@ -176,7 +176,7 @@ static struct platform_driver fsl_sai_driver = {
 module_platform_driver(fsl_sai_driver);
 ```
 
-```C
+```c
 devm_snd_soc_register_component(&pdev->dev, &fsl_component, &fsl_sai_dai, 1);
 --> devres_alloc(devm_component_release, sizeof(*ptr), GFP_KERNEL);
 --> snd_soc_register_component(dev, cmpnt_drv, dai_drv, num_dai);
