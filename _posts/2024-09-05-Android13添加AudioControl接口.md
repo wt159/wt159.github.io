@@ -1,6 +1,6 @@
 ---
 title: Android13添加AudioControl接口
-tags: Android13 Android AudioControl
+tags: android13 android AudioControl
 ---
 
 ## 概述
