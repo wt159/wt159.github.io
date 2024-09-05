@@ -22,8 +22,7 @@ tags: ubuntu vscode android java audio
 cd android_code_path
 cd packages/services/Car
 mkdir mylib
-cd mylib
-ln -s ./../../../frameworks/ frameworks
+ln -s ./../../../frameworks/ mylib/frameworks
 ```
 
 ```shell
