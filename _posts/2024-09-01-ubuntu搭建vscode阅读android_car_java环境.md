@@ -1,6 +1,6 @@
 ---
 title: ubuntu搭建vscode阅读android_car_java环境
-tags: ubuntu vscode android java audio
+tags: ubuntu vscode android java audio AAOS
 ---
 
 # ubuntu搭建vscode阅读android_car_java环境
@@ -22,7 +22,7 @@ tags: ubuntu vscode android java audio
 cd android_code_path
 cd packages/services/Car
 mkdir mylib
-ln -s ./../../../frameworks/ mylib/frameworks
+ln -s ./../../../../frameworks/ mylib/frameworks
 ```
 
 ```shell
