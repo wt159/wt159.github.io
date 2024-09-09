@@ -141,3 +141,73 @@ cd 'hardware/interfaces/automotive/audiocontrol/aidl/aidl_api/android.hardware.a
 cd -
 mmm hardware/interfaces/automotive/audiocontrol/aidl
 ```
+
+## 上层使用接口添加
+
+```diff
+diff --git a/service/src/com/android/car/audio/hal/AudioControlWrapper.java b/service/src/com/android/car/audio/hal/AudioControlWrapper.java
+index f819cf0..18cd2ce 100644
+--- a/service/src/com/android/car/audio/hal/AudioControlWrapper.java
++++ b/service/src/com/android/car/audio/hal/AudioControlWrapper.java
+@@ -120,6 +120,8 @@ public interface AudioControlWrapper {
+      */
+     void setBalanceTowardRight(float value);
+
++    void setBalance(int value);
++
+     /**
+      * Notifies HAL of changes in usages holding focus and the corresponding ducking changes for a
+      * given zone.
+diff --git a/service/src/com/android/car/audio/hal/AudioControlWrapperAidl.java b/service/src/com/android/car/audio/hal/AudioControlWrapperAidl.java
+index e299fe8..a7c0190 100644
+--- a/service/src/com/android/car/audio/hal/AudioControlWrapperAidl.java
++++ b/service/src/com/android/car/audio/hal/AudioControlWrapperAidl.java
+@@ -197,6 +197,15 @@ public final class AudioControlWrapperAidl implements AudioControlWrapper, IBind
+     }
+
+     @Override
++    public void setBalance(int value) {
++        try {
++            mAudioControl.setBalance(value);
++        } catch (RemoteException e) {
++            Slogf.e(TAG, "setBalance with " + value + " failed", e);
++        }
++    }
++
++    @Override
+     public void onDevicesToDuckChange(@NonNull List<CarDuckingInfo> carDuckingInfos) {
+         Objects.requireNonNull(carDuckingInfos);
+         DuckingInfo[] duckingInfos = new DuckingInfo[carDuckingInfos.size()];
+diff --git a/service/src/com/android/car/audio/hal/AudioControlWrapperV1.java b/service/src/com/android/car/audio/hal/AudioControlWrapperV1.java
+index d0be1cb..80a67a5 100644
+--- a/service/src/com/android/car/audio/hal/AudioControlWrapperV1.java
++++ b/service/src/com/android/car/audio/hal/AudioControlWrapperV1.java
+@@ -124,6 +124,11 @@ public final class AudioControlWrapperV1 implements AudioControlWrapper {
+     }
+
+     @Override
++    public void setBalance(int value) {
++        Slogf.e(TAG, "setBalance impl not use, the version");
++    }
++
++    @Override
+     public void onDevicesToDuckChange(List<CarDuckingInfo> carDuckingInfos) {
+         throw new UnsupportedOperationException("HAL ducking is unsupported for IAudioControl@1.0");
+     }
+diff --git a/service/src/com/android/car/audio/hal/AudioControlWrapperV2.java b/service/src/com/android/car/audio/hal/AudioControlWrapperV2.java
+index a62f4b0..75473cb 100644
+--- a/service/src/com/android/car/audio/hal/AudioControlWrapperV2.java
++++ b/service/src/com/android/car/audio/hal/AudioControlWrapperV2.java
+@@ -157,6 +157,11 @@ public final class AudioControlWrapperV2 implements AudioControlWrapper {
+     }
+
+     @Override
++    public void setBalance(int value) {
++        Slogf.e(TAG, "setBalance impl not use, the version");
++    }
++
++    @Override
+     public void onDevicesToDuckChange(List<CarDuckingInfo> carDuckingInfos) {
+         throw new UnsupportedOperationException("HAL ducking is unsupported for IAudioControl@2.0");
+     }
+```
