@@ -26,7 +26,10 @@ graph TD;
     App[应用程序] -->|使用| CarAudioManager;
     CarAudioManager -->|调用| ICarAudio;
     ICarAudio -->|通过 Binder IPC| CarAudioService;
+    CarAudioService -->|实现音频控制逻辑| AudioControlWrapper;
     CarAudioService -->|实现音频控制逻辑| AudioSystem;
+    AudioControlWrapper -->|通过 Binder IPC| AudioControl;
+    AudioSystem -->|通过 Binder IPC| Audio-HAL;
 ```
 
 ## `ICarAudio`
