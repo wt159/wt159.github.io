@@ -23,6 +23,13 @@ cd android_code_path
 cd packages/services/Car
 mkdir mylib
 ln -s ./../../../../frameworks/ mylib/frameworks
+
+mkdir mylib/my_framework_core
+mkdir mylib/my_framework_core/android
+cp  -rf mylib/frameworks/base/core/java/android/content  mylib/my_framework_core/android/
+cp  -rf mylib/frameworks/base/core/java/android/provider  mylib/my_framework_core/android/
+cp  -rf mylib/frameworks/base/core/java/android/util  mylib/my_framework_core/android/
+cp  -rf mylib/frameworks/base/core/java/android/os  mylib/my_framework_core/android/
 ```
 
 ```shell
@@ -53,6 +60,7 @@ cd -
         "mylib/frameworks/libs/modules-utils/java",
         "mylib/frameworks/base/media/java",
         //"mylib/frameworks/base/core/java", //这个里面的源码太多了，需要编译很久，按照自己的需求来确定是否打开
+        "mylib/my_framework_core"
     ],
     "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx8G -Xms100m -Xlog:disable",
 }
