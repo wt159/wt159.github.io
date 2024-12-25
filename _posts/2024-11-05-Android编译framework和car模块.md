@@ -1,6 +1,6 @@
 ---
 title: Android编译framework和car模块
-tags: android framework car app aaos
+tags: android framework car app AAOS
 ---
 
 ## 概述
