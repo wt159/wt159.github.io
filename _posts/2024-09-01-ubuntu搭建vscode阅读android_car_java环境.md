@@ -26,10 +26,12 @@ ln -s ./../../../../frameworks/ mylib/frameworks
 
 mkdir mylib/my_framework_core
 mkdir mylib/my_framework_core/android
-cp  -rf mylib/frameworks/base/core/java/android/content  mylib/my_framework_core/android/
-cp  -rf mylib/frameworks/base/core/java/android/provider  mylib/my_framework_core/android/
-cp  -rf mylib/frameworks/base/core/java/android/util  mylib/my_framework_core/android/
-cp  -rf mylib/frameworks/base/core/java/android/os  mylib/my_framework_core/android/
+cd mylib/my_framework_core/android
+ln -s ../../frameworks/base/core/java/android/content/ content
+ln -s ../../frameworks/base/core/java/android/provider/ provider
+ln -s ../../frameworks/base/core/java/android/util/ util
+ln -s ../../frameworks/base/core/java/android/os/ os
+cd -
 ```
 
 ```shell
@@ -59,6 +61,7 @@ cd -
         "car-builtin-lib/src",
         "mylib/frameworks/libs/modules-utils/java",
         "mylib/frameworks/base/media/java",
+        "mylib/frameworks/base/services/core/java",
         //"mylib/frameworks/base/core/java", //这个里面的源码太多了，需要编译很久，按照自己的需求来确定是否打开
         "mylib/my_framework_core"
     ],
