@@ -25,6 +25,29 @@ cp out/target/common/obj/JAVA_LIBRARIES/framework_intermediates/classes.jar fram
 cp out/target/common/obj/JAVA_LIBRARIES/framework-minus-apex_intermediates/classes.jar framework.jar
 ```
 
+### 编译 framework services 模块
+
+```shell
+source 
+lunch xxx-eng
+# Android10 及以前
+make services
+```
+
+#### 动态更新 services 模块
+
+```shell
+adb root
+adb remount
+adb push system/framework/services.jar /system/framework/
+adb push system/framework/framework.jar /system/framework/
+adb push system/framework/car-frameworks-service.jar /system/framework/
+adb push system/framework/oat/arm64/services.art /system/framework/oat/arm64/
+adb push system/framework/oat/arm64/services.odex /system/framework/oat/arm64/
+adb push system/framework/oat/arm64/services.vdex /system/framework/oat/arm64/
+adb shell sync
+```
+
 ### 编译 car 模块
 
 ```shell
