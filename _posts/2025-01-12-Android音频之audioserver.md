@@ -333,8 +333,8 @@ adb logcat -s audioserver
 
 这部分负责遍历配置文件解析出来的`Module`，然后通过`IBinder`调用到`AudioFlinger`里面，，.下面有几个重要的点：
 
-* `mHwModulesAll`的赋值，是在 `AudioPolicyManager` 构造函数时作为引用传给了`AudioPolicyConfig mConfig`,在解析完时通过`config->setHwModules(modules);`赋值的。
-* ` mDevicesFactoryHal->openDevice(name, &dev);` 这个调用是调用到了音频HAL的 `adev_open` 函数, 并创建了 `AudioHwDevice` 。
+* `mHwModulesAll`的赋值，是在 `AudioPolicyManager` 构造函数时作为引用传给了`AudioPolicyConfig mConfig`,在解析完时通过`config->setHwModules(modules)`赋值的。
+* ` mDevicesFactoryHal->openDevice(name, &dev)` 这个调用是调用到了音频HAL的 `adev_open` 函数, 并创建了 `AudioHwDevice` 。
 * `outHwDev->openOutputStream()` 这个调用是调用的音频HAL的 `adev_open_output_stream` 函数, 并创建了播放线程`PlaybackThread`，然后在线程里面创建了音频混音器`AudioMixer`和输出槽`AudioStreamOutSink`.
 * `inHwHal->openOutputStream()` 这个调用是调用的音频HAL的 `adev_open_input_stream` 函数, 并创建了采集线程`RecordThread`,然后在线程里面创建了输入源`AudioStreamInSource`。
 

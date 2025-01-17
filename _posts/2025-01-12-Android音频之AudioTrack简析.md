@@ -160,6 +160,24 @@ public class AudioTrackExample {
 --------> createTrack_l();
 ----------> const sp<IAudioFlinger>& audioFlinger = AudioSystem::get_audio_flinger();
 ----------> IAudioFlinger::CreateTrackInput input;
+----------> input.attr = mAttributes;
+----------> input.config = AUDIO_CONFIG_INITIALIZER;
+----------> input.config.sample_rate = mSampleRate;
+----------> input.config.channel_mask = mChannelMask;
+----------> input.config.format = mFormat;
+----------> input.config.offload_info = mOffloadInfoCopy;
+----------> input.clientInfo.clientUid = mClientUid;
+----------> input.clientInfo.clientPid = mClientPid;
+----------> input.clientInfo.clientTid = -1;
+----------> input.sharedBuffer = mSharedBuffer;
+----------> input.notificationsPerBuffer = mNotificationsPerBufferReq;
+----------> input.flags = mFlags;
+----------> input.frameCount = mReqFrameCount;
+----------> input.notificationFrameCount = mNotificationFramesReq;
+----------> input.selectedDeviceId = mSelectedDeviceId;
+----------> input.sessionId = mSessionId;
+----------> input.audioTrackCallback = mAudioTrackCallback;
+----------> input.opPackageName = mOpPackageName;
 ----------> IAudioFlinger::CreateTrackOutput output;
 ----------> sp<IAudioTrack> track = audioFlinger->createTrack(input,output,&status);
 ----------> sp<IMemory> iMem = track->getCblk();
@@ -193,9 +211,36 @@ sp<IAudioTrack> AudioFlinger::createTrack(const CreateTrackInput& input,CreateTr
 --> lStatus = AudioSystem::getOutputForAttr(&localAttr, &output.outputId, sessionId, &streamType,
 -->                                         clientPid, clientUid, &input.config, input.flags,
 -->                                         &output.selectedDeviceId, &portId, &secondaryOutputs);
+// frameworks/av/media/libaudioclient/AudioSystem.cpp
 ----> status_t AudioSystem::getOutputForAttr(audio_attributes_t *attr..);
 ----> const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
 ----> return aps->getOutputForAttr(attr, output, session, stream, pid, uid,config,flags, selectedDeviceId, portId, secondaryOutputs);
+// frameworks/av/services/audiopolicy/service/AudioPolicyInterfaceImpl.cpp
+------> AudioPolicyService::getOutputForAttr(audio_attributes_t *attr...);
+--------> mAudioPolicyManager->getOutputForAttr(attr, output, session, stream, uid,config...);
+----------> getOutputForAttrInt(&resultAttr, output, session, attr, stream, uid...);
+------------> mPolicyMixes.getOutputForAttr(*resultAttr, uid, *flags, primaryMix, secondaryMixes);
+------------> bool usePrimaryOutputFromPolicyMixes = requestedDevice == nullptr && primaryMix != nullptr;
+------------> if (usePrimaryOutputFromPolicyMixes) {
+------------>   sp<DeviceDescriptor> deviceDesc = mAvailableOutputDevices.getDevice(primaryMix->mDeviceType,primaryMix->mDeviceAddress...);
+------------>   sp<SwAudioOutputDescriptor> policyDesc = primaryMix->getOutput();
+------------>   sp<IOProfile> profile = getProfileForOutput(DeviceVector(deviceDesc),config->sample_rate,config->format,config->channel_mask,...);
+------------>   policyDesc->mPolicyMix = primaryMix;
+------------>   *output = policyDesc->mIoHandle;
+------------>   *selectedDeviceId = deviceDesc != 0 ? deviceDesc->getId() : AUDIO_PORT_HANDLE_NONE;
+------------>   *outputType = API_OUTPUT_LEGACY;
+------------>   return NO_ERROR;
+------------> }
+------------> outputDevices = mEngine->getOutputDevicesForAttributes(*resultAttr, requestedDevice, false);
+------------> *output = getOutputForDevices(outputDevices, session, *stream, config,flags, resultAttr->flags & AUDIO_FLAG_MUTE_HAPTIC);
+------------> *selectedDeviceId = getFirstDeviceId(outputDevices);
+------------> return NO_ERROR;
+----------> *portId = PolicyAudioPort::getNextUniqueId();
+----------> sp<SwAudioOutputDescriptor> outputDesc = mOutputs.valueFor(*output);
+----------> sp<TrackClientDescriptor> clientDesc =new TrackClientDescriptor(*portId, uid, session...);
+----------> outputDesc->addClient(clientDesc);
+--------> sp <AudioPlaybackClient> client = new AudioPlaybackClient(*attr, *output, uid, pid, session, *portId, *selectedDeviceId, *stream);
+--------> mAudioPlaybackClients.add(*portId, client);
 --> PlaybackThread *thread = checkPlaybackThread_l(output.outputId);
 --> output.sampleRate = input.config.sample_rate;
 --> output.frameCount = input.frameCount;
@@ -212,4 +257,20 @@ sp<IAudioTrack> AudioFlinger::createTrack(const CreateTrackInput& input,CreateTr
 -->                               input.opPackageName);
 --> trackHandle = new TrackHandle(track);
 --> return trackHandle;
+```
+
+
+```java
+public boolean setPreferredDevice(AudioDeviceInfo deviceInfo)
+--> native_setOutputDevice(preferredDeviceId);
+// {"native_setOutputDevice", "(I)Z", (void *)android_media_AudioTrack_setOutputDevice},
+--> mPreferredDevice = deviceInfo;
+```
+
+```c++
+jboolean android_media_AudioTrack_setOutputDevice(JNIEnv *env,  jobject thiz, jint device_id)
+--> sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
+--> lpTrack->setOutputDevice(device_id)
+----> mSelectedDeviceId = deviceId;
+----> mProxy->interrupt();
 ```
