@@ -32,13 +32,96 @@ tags: Android Audio AAOS audioserver
 ----> MediaLogService::instantiate();
 ----> } else {
 ----> AudioFlinger::instantiate();
-------> return sm->addService(String16(SERVICE::getServiceName()), new SERVICE(), allowIsolated,dumpFlags);
+------> return sm->addService(String16("media.audio_flinger"), new AudioFlinger(), allowIsolated,dumpFlags);
 --------> new AudioFlinger();
 --------> AudioFlinger::onFirstRef();
 ----> AudioPolicyService::instantiate();
+------> return sm->addService(String16("media.audio_policy"), new AudioPolicyService(), allowIsolated,dumpFlags);
 ------> new AudioPolicyService();
 ------> AudioPolicyService::onFirstRef();
 ----> }
+```
+
+`AudioFlinger` 和 `AudioPolicyService`直接相互调用，是靠 `libaudioclient.so`的`AudioSystem.cpp`中 `AudioSystem::get_audio_policy_service()` 和 `AudioSystem::get_audio_flinger()`函数,具体实现如下：
+
+```c++
+// client singleton for AudioPolicyService binder interface
+sp<IAudioPolicyService> AudioSystem::gAudioPolicyService;
+sp<AudioSystem::AudioPolicyServiceClient> AudioSystem::gAudioPolicyServiceClient;
+// establish binder interface to AudioPolicy service
+const sp<IAudioPolicyService> AudioSystem::get_audio_policy_service()
+{
+    sp<IAudioPolicyService> ap;
+    sp<AudioPolicyServiceClient> apc;
+    {
+        Mutex::Autolock _l(gLockAPS);
+        if (gAudioPolicyService == 0) {
+            sp<IServiceManager> sm = defaultServiceManager();
+            sp<IBinder> binder = sm->getService(String16("media.audio_policy"));
+            if (gAudioPolicyServiceClient == NULL) {
+                gAudioPolicyServiceClient = new AudioPolicyServiceClient();
+            }
+            binder->linkToDeath(gAudioPolicyServiceClient);
+            gAudioPolicyService = interface_cast<IAudioPolicyService>(binder);
+            LOG_ALWAYS_FATAL_IF(gAudioPolicyService == 0);
+            apc = gAudioPolicyServiceClient;
+            // Make sure callbacks can be received by gAudioPolicyServiceClient
+            ProcessState::self()->startThreadPool();
+        }
+        ap = gAudioPolicyService;
+    }
+    if (apc != 0) {
+        int64_t token = IPCThreadState::self()->clearCallingIdentity();
+        ap->registerClient(apc);
+        ap->setAudioPortCallbacksEnabled(apc->isAudioPortCbEnabled());
+        ap->setAudioVolumeGroupCallbacksEnabled(apc->isAudioVolumeGroupCbEnabled());
+        IPCThreadState::self()->restoreCallingIdentity(token);
+    }
+    return ap;
+}
+```
+
+```c++
+// client singleton for AudioFlinger binder interface
+sp<IAudioFlinger> AudioSystem::gAudioFlinger;
+sp<AudioSystem::AudioFlingerClient> AudioSystem::gAudioFlingerClient;
+// establish binder interface to AudioFlinger service
+const sp<IAudioFlinger> AudioSystem::get_audio_flinger()
+{
+    sp<IAudioFlinger> af;
+    sp<AudioFlingerClient> afc;
+    bool reportNoError = false;
+    {
+        Mutex::Autolock _l(gLock);
+        if (gAudioFlinger == 0) {
+            sp<IServiceManager> sm = defaultServiceManager();
+            sp<IBinder> binder;
+            do {
+                binder = sm->getService(String16("media.audio_flinger"));
+                ...
+            } while (true);
+            if (gAudioFlingerClient == NULL) {
+                gAudioFlingerClient = new AudioFlingerClient();
+            } else {
+                reportNoError = true;
+            }
+            binder->linkToDeath(gAudioFlingerClient);
+            gAudioFlinger = interface_cast<IAudioFlinger>(binder);
+            LOG_ALWAYS_FATAL_IF(gAudioFlinger == 0);
+            afc = gAudioFlingerClient;
+            // Make sure callbacks can be received by gAudioFlingerClient
+            ProcessState::self()->startThreadPool();
+        }
+        af = gAudioFlinger;
+    }
+    if (afc != 0) {
+        int64_t token = IPCThreadState::self()->clearCallingIdentity();
+        af->registerClient(afc);
+        IPCThreadState::self()->restoreCallingIdentity(token);
+    }
+    if (reportNoError) reportError(NO_ERROR);
+    return af;
+}
 ```
 
 ## 日志与调试
@@ -260,10 +343,6 @@ adb logcat -s audioserver
 ------> for (const auto& hwModule : mHwModulesAll) {
 --------> mpClientInterface->loadHwModule(hwModule->getName())
 ----------> sp<IAudioFlinger> af = AudioSystem::get_audio_flinger();
-------------> sp<IServiceManager> sm = defaultServiceManager();
-------------> sp<IBinder> binder = sm->getService(String16("media.audio_flinger"));
-------------> gAudioFlinger = interface_cast<IAudioFlinger>(binder);
-------------> return gAudioFlinger;
 ----------> af->loadHwModule(name);
 ------------> AudioFlinger::loadHwModule(const char *name);
 ------------> loadHwModule_l(name);
