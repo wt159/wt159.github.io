@@ -114,6 +114,8 @@ public class AudioTrackExample {
 
 ### **7. 源码流程**
 
+#### 构造
+
 ```java
 //frameworks/base/media/java/android/media/AudioTrack.java
 --> AudioTrack(AudioAttributes, AudioFormat, int,int, int, boolean, int,TunerConfiguration)
@@ -157,6 +159,8 @@ public class AudioTrackExample {
 ------> AudioTrack::AudioTrack(const std::string& opPackageName);
 ----> status = lpTrack->set(AUDIO_STREAM_DEFAULT...);
 ------> AudioTrack::set(audio_stream_type_t streamType...);
+--------> mAudioTrackThread = new AudioTrackThread(*this);
+--------> mAudioTrackThread->run("AudioTrack", ANDROID_PRIORITY_AUDIO, 0 /*stack*/);
 --------> createTrack_l();
 ----------> const sp<IAudioFlinger>& audioFlinger = AudioSystem::get_audio_flinger();
 ----------> IAudioFlinger::CreateTrackInput input;
@@ -259,6 +263,18 @@ sp<IAudioTrack> AudioFlinger::createTrack(const CreateTrackInput& input,CreateTr
 --> return trackHandle;
 ```
 
+#### start
+
+
+
+#### stop
+
+
+#### write
+
+
+
+#### setPreferredDevice
 
 ```java
 public boolean setPreferredDevice(AudioDeviceInfo deviceInfo)
