@@ -114,6 +114,18 @@ public class AudioTrackExample {
 
 ### **7. 源码流程**
 
+```mermaid
+graph LR;
+    a[java]
+    b[jni]
+    c[audioclient]
+    d[audioflinger]
+    e[audiopolicy]
+    a --> b;
+    b --> c;
+    c --> d;
+    d --> e;
+```
 
 #### 构造
 
