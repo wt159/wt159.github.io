@@ -112,7 +112,15 @@ public class AudioTrackExample {
 
 ---
 
-### **7. 源码流程**
+### **7. 源码路径及流程**
+
+```shell
+ frameworks/base/media/java/android/media/AudioTrack.java
+ frameworks/base/core/jni/android_media_AudioTrack.cpp
+ frameworks/av/media/libaudioclient/AudioTrack.cpp
+ frameworks/av/services/audioflinger/AudioFlinger.cpp
+ frameworks/av/services/audiopolicy/service/AudioPolicyInterfaceImpl.cpp
+```
 
 ```mermaid
 graph LR;
