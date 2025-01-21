@@ -178,10 +178,27 @@ graph LR;
 ----> lpTrack = new AudioTrack(opPackageNameStr.c_str());
 // frameworks/av/media/libaudioclient/AudioTrack.cpp
 ------> AudioTrack::AudioTrack(const std::string& opPackageName);
-----> status = lpTrack->set(AUDIO_STREAM_DEFAULT...);
+----> status = lpTrack->set(AUDIO_STREAM_DEFAULT, // stream type, but more info conveyed
+                            sampleRateInHertz,
+                            format, // word length, PCM
+                            nativeChannelMask, offload ? 0 : frameCount,
+                            offload ? AUDIO_OUTPUT_FLAG_COMPRESS_OFFLOAD
+                                    : AUDIO_OUTPUT_FLAG_NONE,
+                            audioCallback,
+                            &(lpJniStorage->mCallbackData), // callback, callback data (user)
+                            0,    // notificationFrames == 0 since not using EVENT_MORE_DATA
+                                  // to feed the AudioTrack
+                            0,    // shared mem
+                            true, // thread can call Java
+                            sessionId, // audio session ID
+                            offload ? AudioTrack::TRANSFER_SYNC_NOTIF_CALLBACK
+                                    : AudioTrack::TRANSFER_SYNC,
+                            offload ? &offloadInfo : NULL, -1, -1, // default uid, pid values
+                            paa.get());
 ------> AudioTrack::set(audio_stream_type_t streamType...);
 --------> mAudioTrackThread = new AudioTrackThread(*this);
 --------> mAudioTrackThread->run("AudioTrack", ANDROID_PRIORITY_AUDIO, 0 /*stack*/);
+----------> AudioTrack::AudioTrackThread::threadLoop();
 --------> createTrack_l();
 ----------> const sp<IAudioFlinger>& audioFlinger = AudioSystem::get_audio_flinger();
 ----------> IAudioFlinger::CreateTrackInput input;
@@ -230,6 +247,7 @@ graph LR;
 sp<IAudioTrack> AudioFlinger::createTrack(const CreateTrackInput& input,CreateTrackOutput& output,status_t *status)
 --> sp<PlaybackThread::Track> track;
 --> sp<TrackHandle> trackHandle;
+--> sp<Client> client;
 --> output.sessionId = sessionId;
 --> output.outputId = AUDIO_IO_HANDLE_NONE;
 --> output.selectedDeviceId = input.selectedDeviceId;
@@ -267,11 +285,16 @@ sp<IAudioTrack> AudioFlinger::createTrack(const CreateTrackInput& input,CreateTr
 --------> sp <AudioPlaybackClient> client = new AudioPlaybackClient(*attr, *output, uid, pid, session, *portId, *selectedDeviceId, *stream);
 --------> mAudioPlaybackClients.add(*portId, client);
 --> PlaybackThread *thread = checkPlaybackThread_l(output.outputId);
+--> client = registerPid(clientPid);
+----> client = new Client(this, pid);
+------> mMemoryDealer = new MemoryDealer(
+            audioFlinger->getClientSharedHeapSize(),
+            (std::string("AudioFlinger::Client(") + std::to_string(pid) + ")").c_str());
+----> mClients.add(pid, client);
 --> output.sampleRate = input.config.sample_rate;
 --> output.frameCount = input.frameCount;
 --> output.notificationFrameCount = input.notificationFrameCount;
 --> output.flags = input.flags;
--->
 --> track = thread->createTrack_l(client, streamType, localAttr, &output.sampleRate,
 -->                               input.config.format, input.config.channel_mask,
 -->                               &output.frameCount, &output.notificationFrameCount,
@@ -280,6 +303,22 @@ sp<IAudioTrack> AudioFlinger::createTrack(const CreateTrackInput& input,CreateTr
 -->                               callingPid, input.clientInfo.clientTid, clientUid,
 -->                               &lStatus, portId, input.audioTrackCallback,
 -->                               input.opPackageName);
+----> AudioFlinger::PlaybackThread::createTrack_l(...);
+----> track = new Track(this, client, streamType, attr, sampleRate, format,
+                          channelMask, frameCount,
+                          nullptr /* buffer */, (size_t)0 /* bufferSize */, sharedBuffer,
+                          sessionId, creatorPid, uid, *flags, TrackBase::TYPE_DEFAULT, portId,
+                          SIZE_MAX /*frameCountToBeReady*/, opPackageName);
+------> AudioFlinger::ThreadBase::TrackBase::TrackBase(...);
+------> size_t minBufferSize = buffer == NULL ? roundup(frameCount) : frameCount;
+------> minBufferSize *= mFrameSize;
+------> size_t size = sizeof(audio_track_cblk_t);
+------> mCblkMemory = client->heap()->allocate(size);
+------> new(mCblk) audio_track_cblk_t(); // C++ 语法：显式调用构造函数
+------> mBuffer = (char*)mCblk + sizeof(audio_track_cblk_t);
+------> memset(mBuffer, 0, bufferSize);
+----> mTracks.add(track);
+----> return track;
 --> trackHandle = new TrackHandle(track);
 --> return trackHandle;
 ```
@@ -287,13 +326,81 @@ sp<IAudioTrack> AudioFlinger::createTrack(const CreateTrackInput& input,CreateTr
 #### start
 
 
+```c++
+AudioTrack::start();
+--> mAudioTrack->start();
+----> AudioFlinger::PlaybackThread::Track::start(..);
+----> sp<ThreadBase> thread = mThread.promote();
+----> PlaybackThread *playbackThread = (PlaybackThread *)thread.get();
+----> status = playbackThread->addTrack_l(this);
+------> if (mActiveTracks.indexOf(track) < 0) {
+--------> mActiveTracks.add(track);
+--------> sp<EffectChain> chain = getEffectChain_l(track->sessionId());
+--------> chain->incActiveTrackCnt();
+------> }
+------> onAddNewTrack_l();
+--------> broadcast_l();
+----------> mSignalPending = true;
+----------> mWaitWorkCV.broadcast();
+----> mAudioTrackServerProxy->start();
+----> mAudioTrackServerProxy->obtainBuffer(&buffer, true /*ackFlush*/);
+----> forEachTeePatchTrack([](auto patchTrack) { patchTrack->start(); });
+------> for (auto& tp : mTeePatches) { f(tp.patchTrack); }
+```
 
 #### stop
 
 
 #### write
 
-
+```c++
+AudioTrack::write(const void* buffer, size_t userSize, bool blocking);
+--> size_t written = 0;
+--> Buffer audioBuffer;
+--> while (userSize >= mFrameSize) {
+----> audioBuffer.frameCount = userSize / mFrameSize;
+----> status_t err = obtainBuffer(&audioBuffer,blocking ? &ClientProxy::kForever : &ClientProxy::kNonBlocking);
+------> Proxy::Buffer buffer;
+------> sp<AudioTrackClientProxy> proxy = mProxy;
+------> sp<IMemory> iMem = mCblkMemory;
+------> status = proxy->obtainBuffer(&buffer, requested, elapsed);
+--------> audio_track_cblk_t* cblk = mCblk;
+--------> int32_t front = android_atomic_acquire_load(&cblk->u.mStreaming.mFront);
+--------> int32_t rear = cblk->u.mStreaming.mRear;
+--------> ssize_t filled = audio_utils::safe_sub_overflow(rear, front);
+--------> ssize_t adjustableSize = (ssize_t) getBufferSizeInFrames();
+--------> ssize_t avail =  (mIsOut) ? adjustableSize - filled : filled;
+--------> size_t part1;
+--------> rear &= mFrameCountP2 - 1;
+--------> part1 = mFrameCountP2 - rear;
+--------> buffer->mFrameCount = part1;
+--------> buffer->mRaw = part1 > 0 ?&((char *) mBuffers)[(mIsOut ? rear : front) * mFrameSize] : NULL;
+--------> buffer->mNonContig = avail - part1;
+--------> mUnreleased = part1;
+------> audioBuffer->frameCount = buffer.mFrameCount;
+------> audioBuffer->size = buffer.mFrameCount * mFrameSize;
+------> audioBuffer->raw = buffer.mRaw;
+------> audioBuffer->sequence = oldSequence;
+----> size_t toWrite = audioBuffer.size;
+----> memcpy(audioBuffer.i8, buffer, toWrite);
+----> buffer = ((const char *) buffer) + toWrite;
+----> userSize -= toWrite;
+----> written += toWrite;
+----> releaseBuffer(&audioBuffer);
+------> Proxy::Buffer buffer;
+------> buffer.mFrameCount = stepCount;
+------> buffer.mRaw = audioBuffer->raw;
+------> mProxy->releaseBuffer(&buffer);
+--------> size_t stepCount = buffer->mFrameCount;
+--------> mUnreleased -= stepCount;
+--------> audio_track_cblk_t* cblk = mCblk;
+--------> int32_t rear = cblk->u.mStreaming.mRear;
+--------> android_atomic_release_store(stepCount + rear, &cblk->u.mStreaming.mRear);
+------> restartIfDisabled();
+--> }
+--> mFramesWritten += written / mFrameSize;
+--> return written;
+```
 
 #### setPreferredDevice
 

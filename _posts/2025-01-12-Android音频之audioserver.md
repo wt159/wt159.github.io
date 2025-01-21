@@ -367,8 +367,76 @@ adb logcat -s audioserver
 --------------> // MmapPlaybackThread OffloadThread DirectOutputThread
 --------------> thread = new MixerThread(this, outputStream, *output, mSystemReady);
 ----------------> AudioFlinger::MixerThread::MixerThread();
+------------------> AudioFlinger::PlaybackThread::onFirstRef();
+------------------> run(mThreadName, ANDROID_PRIORITY_URGENT_AUDIO);
+--------------------> AudioFlinger::PlaybackThread::threadLoop();
+----------------------> for (int64_t loopCount = 0; !exitPending(); ++loopCount) {
+------------------------> processConfigEvents_l();
+------------------------> saveOutputTracks();
+------------------------> if ((mActiveTracks.isEmpty() && systemTime() > mStandbyTimeNs) || isSuspended()) {
+------------------------>     if (shouldStandby_l()) {threadLoop_standby();}
+------------------------>     if (mActiveTracks.isEmpty() && mConfigEvents.isEmpty()) {
+------------------------>         clearOutputTracks();
+------------------------>         mWaitWorkCV.wait(mLock); //阻塞等待
+------------------------>     }
+------------------------> }
+------------------------> mMixerStatus = prepareTracks_l(&tracksToRemove);
+--------------------------> audio_track_cblk_t* cblk = track->cblk();
+const int trackId = track->id();
+mAudioMixer->create(trackId,track->mChannelMask,track->mFormat,track->mSessionId);
+size_t desiredFrames;
+        const uint32_t sampleRate = track->mAudioTrackServerProxy->getSampleRate();
+        AudioPlaybackRate playbackRate = track->mAudioTrackServerProxy->getPlaybackRate();
+        size_t framesReady = track->framesReady();
+        if ((framesReady >= minFrames) && track->isReady() &&!track->isPaused() && !track->isTerminated()){
+            mixedTracks++;
+            if (track->mainBuffer() != mSinkBuffer && track->mainBuffer() != mMixerBuffer) {
+                if (mEffectBufferEnabled) {mEffectBufferValid = true; /* Later can set directly.*/}
+                chain = getEffectChain_l(track->sessionId());
+                if (chain != 0) {tracksWithEffect++;}
+            }
+            track->setFinalVolume((vrf + vlf) / 2.f);
+             mAudioMixer->setBufferProvider(trackId, track);
+            mAudioMixer->enable(trackId);
+                const std::shared_ptr<TrackBase> &track = mTracks[name];
+                if (!track->enabled) {
+                    track->enabled = true;
+                    invalidate();
+                }
+            mAudioMixer->setParameter(trackId, param, AudioMixer::VOLUME0, &vlf);
+            mAudioMixer->setParameter(trackId, param, AudioMixer::VOLUME1, &vrf);
+            mAudioMixer->setParameter(trackId, param, AudioMixer::AUXLEVEL, &vaf);
+            mAudioMixer->setParameter(trackId,AudioMixer::TRACK,AudioMixer::FORMAT, (void *)track->format());
+            mAudioMixer->setParameter(trackId,AudioMixer::TRACK,AudioMixer::CHANNEL_MASK, (void *)(uintptr_t)track->channelMask());
+            mAudioMixer->setParameter(trackId,AudioMixer::TRACK,AudioMixer::MIXER_CHANNEL_MASK,(void *)(uintptr_t)(mChannelMask | mHapticChannelMask));
+            if (mMixerBufferEnabled && (track->mainBuffer() == mSinkBuffer || track->mainBuffer() == mMixerBuffer)) {
+                mAudioMixer->setParameter(trackId,AudioMixer::TRACK,AudioMixer::MIXER_FORMAT, (void *)mMixerBufferFormat);
+                mAudioMixer->setParameter(trackId,AudioMixer::TRACK,AudioMixer::MAIN_BUFFER, (void *)mMixerBuffer);
+                mMixerBufferValid = true;
+            }
+            track->mRetryCount = kMaxTrackRetries;
+            uint32_t maxSampleRate = mSampleRate * AUDIO_RESAMPLER_DOWN_RATIO_MAX;
+            uint32_t reqSampleRate = proxy->getSampleRate();
+            if (reqSampleRate == 0) {reqSampleRate = mSampleRate;}
+            else if (reqSampleRate > maxSampleRate) {reqSampleRate = maxSampleRate; }
+            mAudioMixer->setParameter(trackId,AudioMixer::RESAMPLE,AudioMixer::SAMPLE_RATE,(void *)(uintptr_t)reqSampleRate);
+            AudioPlaybackRate playbackRate = proxy->getPlaybackRate();
+        } else {
+
+        }
+------------------------> mActiveTracks.updatePowerState(this);
+------------------------> activeTracks.insert(activeTracks.end(), mActiveTracks.begin(), mActiveTracks.end());
+---------------------> }
+---------------------> AudioFlinger::PlaybackThread::threadLoop_write();
+-----------------------> ssize_t framesWritten = mNormalSink->write((char *)mSinkBuffer + offset, count);
+-----------------------> bytesWritten = framesWritten * mFrameSize;
+-----------------------> mNumWrites++;
+-----------------------> mInWrite = false;
+-----------------------> if (mStandby) { mStandby = false; }
+-----------------------> return bytesWritten;
 ----------------> mAudioMixer = new AudioMixer(mNormalFrameCount, mSampleRate);
 ----------------> mOutputSink = new AudioStreamOutSink(output->stream);
+----------------> mNormalSink = initFastMixer ? mPipeSink : mOutputSink;
 --------------> mPlaybackThreads.add(*output, thread);
 --------------> mPatchPanel.notifyStreamOpened(outHwDev, *output);
 ----------> addOutput(output, outputDesc);
