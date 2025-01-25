@@ -310,13 +310,14 @@ sp<IAudioTrack> AudioFlinger::createTrack(const CreateTrackInput& input,CreateTr
                           sessionId, creatorPid, uid, *flags, TrackBase::TYPE_DEFAULT, portId,
                           SIZE_MAX /*frameCountToBeReady*/, opPackageName);
 ------> AudioFlinger::ThreadBase::TrackBase::TrackBase(...);
-------> size_t minBufferSize = buffer == NULL ? roundup(frameCount) : frameCount;
-------> minBufferSize *= mFrameSize;
-------> size_t size = sizeof(audio_track_cblk_t);
-------> mCblkMemory = client->heap()->allocate(size);
-------> new(mCblk) audio_track_cblk_t(); // C++ 语法：显式调用构造函数
-------> mBuffer = (char*)mCblk + sizeof(audio_track_cblk_t);
-------> memset(mBuffer, 0, bufferSize);
+--------> size_t minBufferSize = buffer == NULL ? roundup(frameCount) : frameCount;
+--------> minBufferSize *= mFrameSize;
+--------> size_t size = sizeof(audio_track_cblk_t);
+--------> mCblkMemory = client->heap()->allocate(size);
+--------> new(mCblk) audio_track_cblk_t(); // C++ 语法：显式调用构造函数
+--------> mBuffer = (char*)mCblk + sizeof(audio_track_cblk_t);
+--------> memset(mBuffer, 0, bufferSize);
+------> mAudioTrackServerProxy = new AudioTrackServerProxy(mCblk, mBuffer, frameCount,mFrameSize, !isExternalTrack(), sampleRate);
 ----> mTracks.add(track);
 ----> return track;
 --> trackHandle = new TrackHandle(track);
