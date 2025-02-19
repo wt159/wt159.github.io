@@ -56,10 +56,7 @@ cd -
 {
     "java.project.sourcePaths": [
         "service/src",
-        "service-builtin/src",
         "car-lib/src",
-        "car-builtin-lib/src",
-        "mylib/frameworks/libs/modules-utils/java",
         "mylib/frameworks/base/media/java",
         "mylib/frameworks/base/services/core/java",
         //"mylib/frameworks/base/core/java", //这个里面的源码太多了，需要编译很久，按照自己的需求来确定是否打开
