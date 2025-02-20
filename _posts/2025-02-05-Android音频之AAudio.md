@@ -13,10 +13,10 @@ AAudio 是 Android 提供的原生音频 API，专为低延迟、高性能音频
 
 AAudio 提供了一个 C 风格的音频 API，允许开发者直接访问底层音频硬件。相比传统的 Java 层音频 API（如 AudioTrack、MediaPlayer），AAudio 在延迟、资源开销和实时性方面有显著优势，非常适合专业音频、音乐制作、语音通信和游戏等场景。
 
-主要特点包括：
-- **低延迟**：专为低延迟音频传输设计，能够满足实时音频处理的要求。
-- **高性能**：直接与音频硬件交互，减少了不必要的抽象层，提高了整体性能。
-- **简单易用**：采用 C 接口，使得基于 C/C++ 的音频应用可以直接调用，实现跨平台兼容性。
+核心特性
+- 🚀 **低延迟优先**：通过`AAUDIO_PERFORMANCE_MODE_LOW_LATENCY`模式实现<10ms延迟
+- 🔒 **独占模式**：`AAUDIO_SHARING_MODE_EXCLUSIVE`直接访问硬件，但需处理设备占用冲突
+- 📊 **智能缓冲**：动态调整缓冲区大小，平衡`underrun`和延迟
 
 ---
 
@@ -77,7 +77,8 @@ AAudio 的开发主要围绕以下几个核心组件和概念展开：
    AAudioStream_requestStart(stream);
    // 写入 PCM 数据……
    AAudioStream_write(stream, audioBuffer, bufferSize, timeoutNanos);
-   
+   // 录制
+   AAudioStream_read(stream, audioBuffer, bufferSize, timeoutNanos);
    ```
    对于录制音频，同理调用 `AAudioStream_read` 获取数据。
 
@@ -89,18 +90,43 @@ AAudio 的开发主要围绕以下几个核心组件和概念展开：
    AAudioStreamBuilder_delete(builder);
    ```
 
+5. **动态缓冲区调整**
+   ```c
+   void optimizeBuffer(AAudioStream* stream) {
+      int32_t burstSize = AAudioStream_getFramesPerBurst(stream);
+      int32_t currentSize = AAudioStream_getBufferSizeInFrames(stream);
+      
+      if (AAudioStream_getXRunCount(stream) > 0) {
+         AAudioStream_setBufferSize(stream, currentSize + burstSize);
+      }
+   }
+   ```
+
 ---
 
-## 4. 核心优势与使用场景
+## 4. 数据读写模式对比
+| 模式         | 特点                          | 适用场景              |
+|--------------|-------------------------------|---------------------|
+| 阻塞写入     | 保证数据完整性                | 精确时序控制        |
+| 非阻塞写入   | 可能丢失数据                  | 实时性优先          |
+| 回调模式     | 自动触发数据请求              | 流式处理            |
 
-### 4.1 低延迟优势
-AAudio 能够显著降低音频播放和录制的延迟，适用于实时音频处理、在线通话、音乐制作等需要即时响应的场景。
+### 4.1 回调模式示例
+```cpp
+aaudio_data_callback_result_t dataCallback(
+    AAudioStream* stream,
+    void* userData,
+    void* audioData,
+    int32_t numFrames) {
+    
+    // 生成或处理音频数据
+    generateSineWave(static_cast<float*>(audioData), numFrames);
+    return AAUDIO_CALLBACK_RESULT_CONTINUE;
+}
 
-### 4.2 高性能
-通过直接操作底层硬件，AAudio 降低了系统调用的开销，在高负载环境下仍能保持稳定性能，适合对资源敏感的应用。
-
-### 4.3 专业音频应用
-AAudio 支持独占模式、流回调和高级音频流配置，使得开发者能够构建高保真、低延迟的专业音频应用，如实时混音、音频效果处理等。
+// 设置回调
+AAudioStreamBuilder_setDataCallback(builder, dataCallback, nullptr);
+```
 
 ---
 
@@ -122,6 +148,18 @@ int32_t AAudioProperty_getMMapPolicy();
 int32_t AAudioProperty_getMMapExclusivePolicy();
 #define AAUDIO_PROP_MMAP_EXCLUSIVE_POLICY "aaudio.mmap_exclusive_policy"
 ```
+---
+
+## 6. 兼容性方案
+推荐使用Google的**Oboe库**：
+```gradle
+implementation 'com.google.oboe:oboe:1.7.0'
+```
+Oboe特性：
+- 自动选择AAudio/OpenSL ES后端
+- 统一的API接口
+- 内置Glitch消除算法
+
 ---
 
 **参考资料**  
