@@ -262,14 +262,27 @@ Activate MediaPlayer
 participant IMediaDeathNotifier
 Activate MediaPlayerService
 Activate MediaPlayerService_Client
-Activate MediaPlayerFactory
-Activate NuPlayerFactory
 Activate NuPlayerDriver
 Activate AVNuFactory
 Activate NuPlayer
 Activate AudioOutput
+Activate GenericSource
 
 Actor->MediaPlayer: prepare()
 MediaPlayer->MediaPlayer: prepareAsync_l()
+MediaPlayer->MediaPlayerService_Client: setParameter()
+MediaPlayerService_Client->MediaPlayerService_Client: setAudioAttributes_l()
+MediaPlayerService_Client->AudioOutput: setAudioAttributes()
+AudioOutput->AudioOutput: mStreamType = AudioSystem::attributesToStreamType(*attributes)
+MediaPlayer->MediaPlayer: mCurrentState = MEDIA_PLAYER_PREPARING;
+MediaPlayer->MediaPlayerService_Client: prepareAsync()
+MediaPlayerService_Client->MediaPlayerService_Client: getPlayer()
+MediaPlayerService_Client->NuPlayerDriver: prepareAsync()
+NuPlayerDriver->NuPlayer: prepareAsync()
+NuPlayer->NuPlayer: (new AMessage(kWhatPrepare, this))->post();
+NuPlayer->NuPlayer: onMessageReceived()
+NuPlayer->GenericSource: prepareAsync()
+GenericSource->GenericSource: onPrepareAsync()
+GenericSource->GenericSource: initFromDataSource()
 @enduml
 ```

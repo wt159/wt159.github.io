@@ -22,7 +22,7 @@ tags: ubuntu vscode android java audio AAOS
 cd android_code_path
 cd packages/services/Car
 mkdir mylib
-ln -s ./../../../../frameworks/ mylib/frameworks
+ln -s ./../../../../frameworks mylib/frameworks
 
 mkdir mylib/my_framework_core
 mkdir mylib/my_framework_core/android
@@ -57,6 +57,7 @@ cd -
     "java.project.sourcePaths": [
         "service/src",
         "car-lib/src",
+        // "car-builtin-lib/src", //Android 13
         "mylib/frameworks/base/media/java",
         "mylib/frameworks/base/services/core/java",
         //"mylib/frameworks/base/core/java", //这个里面的源码太多了，需要编译很久，按照自己的需求来确定是否打开
