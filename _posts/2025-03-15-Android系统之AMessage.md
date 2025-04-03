@@ -32,7 +32,7 @@ Android中的ALooper、AHandler和AMessage是Native层实现的一套异步消�
 ### 协作流程
 1. **初始化**  
    • 创建ALooper实例并启动线程循环：  
-     ```cpp
+     ```c++
      sp<ALooper> mLooper = new ALooper();
      mLooper->start(false, true, ANDROID_PRIORITY_VIDEO);
      ```  
@@ -40,7 +40,7 @@ Android中的ALooper、AHandler和AMessage是Native层实现的一套异步消�
 
 2. **消息发送**  
    • 构造AMessage并指定目标AHandler：  
-     ```cpp
+     ```c++
      sp<AMessage> msg = new AMessage(kWhatEvent, mHandler);
      msg->setInt32("value", 100);
      msg->post();
@@ -77,7 +77,7 @@ AMessage是Android Native层异步通信的核心载体，其接口设计兼顾�
 
 #### 一、数据存取接口（类型安全操作）
 1. **基础类型存取**  
-   ```cpp
+   ```c++
    // 设置数据
    void setInt32(const char *name, int32_t value);
    void setString(const char *name, const AString &value);
@@ -91,14 +91,14 @@ AMessage是Android Native层异步通信的核心载体，其接口设计兼顾�
    • **特点**：通过键值对（`const char*`）实现强类型数据存取，支持`int32_t`、`AString`、`ABuffer`等常用类型。
 
 2. **复杂对象传递**  
-   ```cpp
+   ```c++
    void setObject(const char *name, const sp<RefBase> &obj);
    bool findObject(const char *name, sp<RefBase> *obj) const;
    ```
    • **应用场景**：传递继承自`RefBase`的智能指针对象（如跨线程共享的媒体缓冲区）。
 
 3. **嵌套消息支持**  
-   ```cpp
+   ```c++
    bool findMessage(const char *name, sp<AMessage> *msg) const;
    ```
    • **用途**：构建消息链式处理逻辑（如将子任务结果封装为嵌套消息）。
@@ -107,16 +107,16 @@ AMessage是Android Native层异步通信的核心载体，其接口设计兼顾�
 
 #### 二、消息投递与控制接口
 1. **异步投递**  
-   ```cpp
+   ```c++
    status_t post(int64_t delayUs = 0);  // 延迟投递（单位微秒）
    ```
    • **示例**：延迟100ms发送消息  
-     ```cpp
+     ```c++
      msg->post(100000);  // 用于定时任务或流量控制
      ```
 
 2. **同步通信机制**  
-   ```cpp
+   ```c++
    status_t postAndAwaitResponse(sp<AMessage> *response);  // 发送并等待回复
    bool senderAwaitsResponse(sp<AReplyToken> *replyID);    // 判断是否需要回复
    status_t postReply(const sp<AReplyToken> &replyID);     // 返回响应消息
@@ -130,14 +130,14 @@ AMessage是Android Native层异步通信的核心载体，其接口设计兼顾�
 
 #### 三、生命周期管理接口
 1. **对象复用机制**  
-   ```cpp
+   ```c++
    static sp<AMessage> obtain();  // 从对象池获取实例
    void recycle();                // 重置消息状态并回收至对象池
    ```
    • **优势**：减少内存分配开销（类似Java层`Message.obtain()`的设计）。
 
 2. **深拷贝支持**  
-   ```cpp
+   ```c++
    sp<AMessage> dup() const;  // 创建完全独立的副本
    ```
    • **使用场景**：多线程环境下需要发送相同消息至不同Handler时。
@@ -146,14 +146,14 @@ AMessage是Android Native层异步通信的核心载体，其接口设计兼顾�
 
 #### 四、辅助功能接口
 1. **消息内容探查**  
-   ```cpp
+   ```c++
    size_t countEntries() const;                          // 获取键值对总数
    const char* getEntryNameAt(size_t index, Type *type); // 遍历消息字段
    ```
    • **调试用途**：动态分析消息结构，适用于复杂状态机的日志输出。
 
 2. **目标标识操作**  
-   ```cpp
+   ```c++
    void setWhat(uint32_t what);          // 设置消息类型标识
    void setTarget(handler_id handlerID); // 指定接收Handler的ID
    ```
@@ -200,7 +200,7 @@ new Thread(() -> {
 ### Native层（C++）Handler示例代码
 
 #### 场景：自定义线程通过ALooper处理异步消息
-```cpp
+```c++
 // 继承AHandler实现消息处理器
 class MyHandler : public AHandler {
 public:
@@ -256,7 +256,8 @@ msg->post(); // 异步投递消息
 
 ### 进阶技巧
 1. **Native层同步通信**：
-```cpp
+
+```c++
 // 发送端
 sp<AMessage> response;
 msg->postAndAwaitResponse(&response); // 阻塞等待响应
@@ -270,6 +271,7 @@ if (msg->senderAwaitsResponse(&replyID)) {
 ```
 
 2. **Java与Native交互**：
+
 ```java
 // 通过JNI获取NativeHandler指针
 public native void sendNativeMessage(int value);
