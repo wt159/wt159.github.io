@@ -52,12 +52,30 @@ cd -
 
 > `ctrl + shift + p` 输入 `首选项: 打开工作区设置(JSON)`
 
+#### Android 11
+
 ```json
 {
     "java.project.sourcePaths": [
         "service/src",
         "car-lib/src",
-        // "car-builtin-lib/src", //Android 13
+        "mylib/frameworks/base/media/java",
+        "mylib/frameworks/base/services/core/java",
+        //"mylib/frameworks/base/core/java", //这个里面的源码太多了，需要编译很久，按照自己的需求来确定是否打开
+        "mylib/my_framework_core"
+    ],
+    "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx8G -Xms100m -Xlog:disable",
+}
+```
+
+#### Android 13
+
+```json
+{
+    "java.project.sourcePaths": [
+        "service/src",
+        "car-lib/src",
+        "car-builtin-lib/src",
         "mylib/frameworks/base/media/java",
         "mylib/frameworks/base/services/core/java",
         //"mylib/frameworks/base/core/java", //这个里面的源码太多了，需要编译很久，按照自己的需求来确定是否打开
