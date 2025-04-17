@@ -137,16 +137,16 @@ public int load(AssetFileDescriptor afd, int priority)
 public int load(FileDescriptor fd, long offset, long length, int priority)
 ```
 **参数解析**：  
-• `String path`             : 音频文件的路径 
-• `Context context`         : 应用程序上下文
-• `int resId`               : 资源ID
-• `AssetFileDescriptor afd` : 一个资产文件描述符
-• `FileDescriptor fd`       : 一个文件描述符对象
-• `int priority`            : 声音的优先级。目前没有效果。为将来的兼容性，请使用值1。   
-• 支持从res、Asset、文件路径等多种方式加载。
+• `String path`             : 音频文件的路径  
+• `Context context`         : 应用程序上下文  
+• `int resId`               : 资源ID  
+• `AssetFileDescriptor afd` : 一个资产文件描述符  
+• `FileDescriptor fd`       : 一个文件描述符对象  
+• `int priority`            : 声音的优先级。目前没有效果。为将来的兼容性，请使用值1。  
+• 支持从res、Asset、文件路径等多种方式加载。  
 
-**返回值**
-• `返回值`: 返回一个sound ID
+**返回值**  
+• `返回值`: 返回一个sound ID  
 
 ---
 
