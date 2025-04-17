@@ -10,6 +10,7 @@ Android系统中的`SoundPool`类。以下是对其核心功能、使用场景�
 ---
 
 ### 一、SoundPool的核心功能
+
 1. **短音效高效播放**  
    SoundPool专为快速播放短音频（如游戏音效、按钮点击声）设计，通过预加载音频到内存实现低延迟播放。支持同时播放多个音频流（默认最多10个），适合需要频繁触发音效的场景。
    
@@ -24,6 +25,7 @@ Android系统中的`SoundPool`类。以下是对其核心功能、使用场景�
 ---
 
 ### 二、适用场景
+
 1. **游戏开发**  
    • **即时反馈音效**：如射击声、跳跃声、爆炸声等需要快速响应的音效。
    • **环境音效**：背景音乐或特殊场景音效（如风声、引擎声）。
@@ -35,7 +37,9 @@ Android系统中的`SoundPool`类。以下是对其核心功能、使用场景�
 ---
 
 ### 三、使用步骤与代码示例
+
 1. **初始化SoundPool**  
+
    ```java
    // Android 5.0+推荐使用Builder方式
    AudioAttributes attributes = new AudioAttributes.Builder()
@@ -100,6 +104,7 @@ Android系统中的`SoundPool`类。以下是对其核心功能、使用场景�
 ---
 
 ### 六、总结
+
 SoundPool是Android中处理短音效的高效工具，尤其适合游戏和交互密集型应用。开发者需注意资源管理、版本兼容性及性能优化，合理封装可提升代码可维护性。对于长音频播放，建议结合`MediaPlayer`或`ExoPlayer`使用。
 
 以下是Android SoundPool的常用接口详解及代码示例，结合多个开发场景和注意事项整理而成：
@@ -108,6 +113,7 @@ SoundPool是Android中处理短音效的高效工具，尤其适合游戏和交�
 
 ### 七、核心接口与使用示例
 #### 1. **SoundPool初始化**
+
 ```java
 // Android 5.0+推荐方式（使用Builder）
 SoundPool soundPool = new SoundPool.Builder()
@@ -123,13 +129,24 @@ SoundPool soundPool = new SoundPool.Builder()
 ---
 
 #### 2. **加载音频资源**
+
 ```java
-// 加载资源文件（R.raw.sound_effect为res/raw目录下的音频）
-int soundId = soundPool.load(context, R.raw.sound_effect, 1);
+public int load(String path, int priority);
+public int load(Context context, int resId, int priority)
+public int load(AssetFileDescriptor afd, int priority)
+public int load(FileDescriptor fd, long offset, long length, int priority)
 ```
 **参数解析**：  
-• `priority`（第三个参数）：加载优先级（实际未生效，未来版本可能支持）。  
-• 支持从Asset、文件路径等多种方式加载。
+• `String path`             : 音频文件的路径 
+• `Context context`         : 应用程序上下文
+• `int resId`               : 资源ID
+• `AssetFileDescriptor afd` : 一个资产文件描述符
+• `FileDescriptor fd`       : 一个文件描述符对象
+• `int priority`            : 声音的优先级。目前没有效果。为将来的兼容性，请使用值1。   
+• 支持从res、Asset、文件路径等多种方式加载。
+
+**返回值**
+• `返回值`: 返回一个sound ID
 
 ---
 
