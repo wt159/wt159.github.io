@@ -56,7 +56,7 @@ lunch xxx-eng
 make android.car
 make CarService
 # Android13 及以后
-make CarServiceUpdatableNonModule
+make make CarServiceUpdatable
 
 cp out/target/common/obj/JAVA_LIBRARIES/android.car_intermediates/classes.jar android.car.jar
 # 相关Android.bp文件
@@ -71,7 +71,7 @@ adb root
 adb remount
 adb push CarService /system/priv-app/
 # Android13 及以后
-adb push CarServiceUpdatableNonModule /system/priv-app/
+adb push CarServiceUpdatable /system/apex/com.android.car.framework/priv-app/CarServiceUpdatable@TQ3A.230805.001.S1/
 adb shell sync
 ```
 
@@ -115,7 +115,7 @@ String #726: VMS-clientservice
 String #2150: Car input service
 ```
 ```shell
-$ aapt dump strings out/target/product/xxx/system/priv-app/CarServiceUpdatableNonModule/CarServiceUpdatableNonModule.apk |grep -e service -e "com."
+$ aapt dump strings out/target/product/xxx/system/apex/com.android.car.framework/priv-app/CarServiceUpdatable@TQ3A.230805.001.S1/CarServiceUpdatable.apk |grep -e service -e "com."
 String #22: Car service
 String #42: Controls which service can bind to OemCarService
 String #64: car_evs_service
