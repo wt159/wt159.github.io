@@ -256,3 +256,112 @@ public class SoundManager {
    • 当前版本优先级参数未生效，需通过`maxStreams`控制并发。
 
 ---
+
+### 十、C++层示例
+
+源码路径:
+
+> libsoundpool.so
+
+> frameworks/base/media/jni/soundpool/tests/soundpool_stress.cpp
+
+注意: 只能系统native层使用，NDK不能使用，无法直接依赖这个动态库。
+
+具体示例如下：
+
+```C++
+int loop = 1;
+int maxStreams = 40; // change to have more concurrent playback streams
+std::vector<std::string> finenames = {
+    "/system/etc/test1.wav",
+    "/system/etc/test2.wav",
+    "/system/etc/test3.wav",
+};
+// create soundpool
+audio_attributes_t aa = {
+    .content_type = AUDIO_CONTENT_TYPE_MUSIC,
+    .usage = AUDIO_USAGE_MEDIA,
+};
+auto soundPool = std::make_unique<SoundPool>(maxStreams, aa);
+
+std::vector<int32_t> soundIDs;
+for (auto filename : filenames) {
+    struct stat st;
+    if (stat(filename, &st) < 0) {
+        printf("ERROR: cannot stat %s\n", filename);
+        return;
+    }
+    const uint64_t length = uint64_t(st.st_size);
+    const int inp = open(filename, O_RDONLY);
+    if (inp < 0) {
+        printf("ERROR: cannot open %s\n", filename);
+        return;
+    }
+    printf("loading (%s) size (%llu)\n", filename, (unsigned long long)length);
+    const int32_t soundID = soundPool->load(
+            inp, 0 /*offset*/, length, 0 /*priority - unused*/);
+    if (soundID == 0) {
+        printf("ERROR: cannot load %s\n", filename);
+        return;
+    }
+    close(inp);
+    soundIDs.emplace_back(soundID);
+    printf("loaded %s soundID(%d)\n", filename, soundID);
+}
+// create stream & get Id (playing)
+const float maxVol = 1.f;
+const float silentVol = 0.f;
+const int priority = 0; // lowest
+const float rate = 1.f;  // normal
+
+// Loading is done by a SoundPool Worker thread.
+// TODO: Use SoundPool::setCallback() for wait
+
+for (int32_t soundID : soundIDs) {
+    for (int i = 0; i <= repeat; ++i) {
+        while (true) {
+            const int32_t streamID =
+                soundPool->play(soundID, silentVol, silentVol, priority, 0 /*loop*/, rate);
+            if (streamID != 0) {
+                const int32_t events = gCallbackManager.getNumberEvents(soundID);
+                if (events != 1) {
+                   printf("WARNING: successful play for streamID:%d soundID:%d"
+                          " but callback events(%d) != 1\n", streamID, soundID, events);
+                   ++gWarnings;
+                }
+                soundPool->stop(streamID);
+                break;
+            }
+            usleep(1000);
+        }
+        printf("[%d]", soundID);
+        fflush(stdout);
+    }
+}
+
+// check and play (overlap with above).
+std::vector<int32_t> streamIDs;
+for (int32_t soundID : soundIDs) {
+    for (int i = 0; i <= repeat; ++i) {
+        printf("\nplaying soundID=%d", soundID);
+        const int32_t streamID =
+                soundPool->play(soundID, maxVol, maxVol, priority, loop, rate);
+        if (streamID == 0) {
+            printf(" failed!  ERROR");
+            ++gErrors;
+        } else {
+            printf(" streamID=%d", streamID);
+            streamIDs.emplace_back(streamID);
+        }
+    }
+}
+
+for (int32_t streamID : streamIDs) {
+    soundPool->stop(streamID);
+}
+
+for (int32_t soundID : soundIDs) {
+    soundPool->unload(soundID);
+}
+
+```
