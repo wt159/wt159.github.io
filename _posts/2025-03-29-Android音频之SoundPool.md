@@ -365,3 +365,11 @@ for (int32_t soundID : soundIDs) {
 }
 
 ```
+
+### 十一、相关源码路径
+
+frameworks/base/media/java/android/media/SoundPool.java
+
+frameworks/base/media/jni/soundpool/android_media_SoundPool.cpp
+
+frameworks/base/media/jni/soundpool/SoundPool.cpp
