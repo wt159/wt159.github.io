@@ -56,7 +56,7 @@ lunch xxx-eng
 make android.car
 make CarService
 # Android13 及以后
-make make CarServiceUpdatable
+make CarServiceUpdatable
 
 cp out/target/common/obj/JAVA_LIBRARIES/android.car_intermediates/classes.jar android.car.jar
 # 相关Android.bp文件
