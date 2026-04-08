@@ -69,9 +69,9 @@ cp out/target/common/obj/JAVA_LIBRARIES/android.car_intermediates/classes.jar an
 ```shell
 adb root
 adb remount
-adb push CarService /system/priv-app/
+adb push CarService.apk /system/priv-app/
 # Android13 及以后
-adb push CarServiceUpdatable /system/apex/com.android.car.framework/priv-app/CarServiceUpdatable@TQ3A.230805.001.S1/
+adb push CarServiceUpdatable.apk /system/apex/com.android.car.framework/priv-app/CarServiceUpdatable@TQ3A.230901.001.C2/
 adb shell sync
 ```
 
