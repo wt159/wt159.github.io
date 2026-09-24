@@ -19,7 +19,7 @@
 text_skin: ocean # "default" (default), "dark", "forest", "ocean", "chocolate", "orange"
 highlight_theme: tomorrow-night-eighties # "default" (default), "tomorrow", "tomorrow-night", "tomorrow-night-eighties", "tomorrow-night-blue", "tomorrow-night-bright"
 url     : # the base hostname & protocol for your site e.g. https://www.someone.com
-baseurl : # does not include hostname
+baseurl : "" # does not include hostname
 title   : wtp的博客
 description: > # this means to ignore newlines until "Language & timezone"
   个人博客，记录自己工作和学习的笔记等。
@@ -186,6 +186,7 @@ permalink   : date
 
 exclude:
   - CHANGELOG.md
+  - CLAUDE.md
   - HOW_TO_RELEASE.md
   - Gemfile
   - Gemfile.lock

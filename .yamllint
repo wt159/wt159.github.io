@@ -1,0 +1,15 @@
+extends: default
+rules:
+  # Theme's legacy _config.yml style (inherited from upstream TeXt theme):
+  # - aligned colons ("key : value"), long comment lines, 2-space indented
+  #   sequences. Don't reformat; relax rules to match, to avoid merge conflicts.
+  line-length: disable
+  colons: disable
+  empty-lines: disable
+  comments: disable
+  comments-indentation: disable
+  truthy: disable
+  document-start: disable
+  indentation:
+    spaces: 2
+    indent-sequences: consistent
